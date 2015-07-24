@@ -22,7 +22,7 @@
  * @constructor
  * @since: 2015.07.10
  * @author: h.m.kwon
- * 
+ *
  */
 
 define([
@@ -331,8 +331,8 @@ define([
     codemirror.commands['tern-jumpback'] = function (cm) {
         cm._ternAddon.jumpBack(cm);
     };
-    codemirror.commands['tern-rename'] = function (cm) {
-        cm._ternAddon.rename(cm);
+    codemirror.commands['yatern-rename'] = function (cm) {
+        cm.yaternAddon.rename(cm);
     };
     /*
     codemirror.commands['tern-showreference'] = function (cm) {
@@ -1631,8 +1631,8 @@ define([
                 items['&Go to Definition'] = menuItems.navMenuItems['&Go to Definition'];
 
                 if (this.isDefaultKeyMap()) {
-                    items['G&o to Line'] = menuItems.navMenuItems['G&o to Line'];               
-                }            
+                    items['G&o to Line'] = menuItems.navMenuItems['G&o to Line'];
+                }
 
                 if (this.isThereMatchingBracket()) {
                     items['Go to &Matching Brace'] = menuItems.navMenuItems['Go to &Matching Brace'];
@@ -1656,7 +1656,7 @@ define([
                     items['&Save'] = menuItems.fileMenuItems['&Save'];
                 }
                 deferred.resolve(items);
-            }            
+            }
         }
     });
 

@@ -338,8 +338,8 @@ define([
     codemirror.commands['tern-jumpback'] = function (cm) {
         cm._ternAddon.jumpBack(cm);
     };
-    codemirror.commands['tern-rename'] = function (cm) {
-        cm._ternAddon.rename(cm);
+    codemirror.commands['yatern-rename'] = function (cm) {
+        cm.yaternAddon.rename(cm);
     };
     /*
     codemirror.commands['tern-showreference'] = function (cm) {
@@ -492,17 +492,17 @@ define([
         cm.__instance.triggerEvent('save');
     };
 
-    function jshint(cm, callback) {
-        if (cm._ternAddon) {
-            cm._ternAddon.getHint(cm, callback);
-        } else {
-            startJavaScriptAssist(cm.__instance, cm, function () {
-                cm._ternAddon.getHint(cm, callback);
-            });
-        }
-    }
-
-    codemirror.registerHelper('hint', 'javascript', jshint);
+    //function jshint(cm, callback) {
+    //    if (cm._ternAddon) {
+    //        cm._ternAddon.getHint(cm, callback);
+    //    } else {
+    //        startJavaScriptAssist(cm.__instance, cm, function () {
+    //            cm._ternAddon.getHint(cm, callback);
+    //        });
+    //    }
+    //}
+    //
+    //codemirror.registerHelper('hint', 'javascript', jshint);
 
     function mergeResult(resultAll, resultThis) {
         if (resultThis && resultThis.list) {
@@ -589,29 +589,32 @@ define([
     }
 
     function startJavaScriptAssist(editor, cm, c) {
-        if (cm._ternAddon) {
-            if (c) {
-                c();
-            }
-        }
-        require(['./content-assist/js-hint'], function (jshint) {
-            var options = {};
-            options.useWorker = settings.useWorker;
-            options.autoHint = settings.autoHint;
-
-            jshint.startServer(editor.file.path, cm, options, function (server) {
-                cm._ternAddon = server.ternAddon;
-                editor.assister = server;
-                editor.addExtraKeys({
-                    'Ctrl-I': 'tern-showtype',
-                    'Alt-.': 'tern-gotodefinition',
-                    'Alt-,': 'tern-jumpback',
-                    // 'Ctrl-B': 'tern-showreference'
-                });
-                if (c) {
-                    c();
-                }
-            });
+        //if (cm._ternAddon) {
+        //    if (c) {
+        //        c();
+        //    }
+        //}
+        //require(['./content-assist/js-hint'], function (jshint) {
+        //    var options = {};
+        //    options.useWorker = settings.useWorker;
+        //    options.autoHint = settings.autoHint;
+        //
+        //    jshint.startServer(editor.file.path, cm, options, function (server) {
+        //        cm._ternAddon = server.ternAddon;
+        //        editor.assister = server;
+        //        editor.addExtraKeys({
+        //            'Ctrl-I': 'tern-showtype',
+        //            'Alt-.': 'tern-gotodefinition',
+        //            'Alt-,': 'tern-jumpback',
+        //            // 'Ctrl-B': 'tern-showreference'
+        //        });
+        //        if (c) {
+        //            c();
+        //        }
+        //    });
+        //});
+        require(['./content-assist/yatern'], function (yatern) {
+            yatern.startServer(editor.file.path, cm, {});
         });
     }
 
@@ -859,7 +862,7 @@ define([
              )
             );
     }
-    
+
     function getBeautifier(editor, callback) {
         var currentModeName = editor.getMode().name;
         var beautifierModuleID;
@@ -891,7 +894,7 @@ define([
         }
         /* jshint camelcase: true */
     }
-    
+
     genetic.inherits(CodeEditorViewer, TextEditorViewer, {
 
 	    create: function () {
@@ -931,15 +934,15 @@ define([
 	        setOption('lineWrapping', this.options.lineWrapping);
 
 	        this.editor = codemirror(this.getContainerElement(), options);
-	        
+
             this.editor.on("change", function(cm, change) {
             	if(self.getModel()){
             		self.getModel().update(cm.getValue(), self);
             	}
                 //console.log('self.getModel() = ', self.getModel());
-            }); 
+            });
 
-	        
+
 	        this.editor.setOption('showCursorWhenSelecting', true);
 	        this.editor.__instance = this;
 	        $(this.editor.getWrapperElement()).addClass('maincodeeditor');
@@ -1307,7 +1310,7 @@ define([
 
 	        setChangeForAutoHintDebounced();
 	    },
-        
+
         lineComment: function () {
             this.addDeferredAction(function (self) {
                 var editor = self.editor;
@@ -1442,7 +1445,7 @@ define([
                 });
             });
         },
-        
+
         gotoDefinition: function () {
             this.addDeferredAction(function (self) {
                 var editor = self.editor;
@@ -1457,7 +1460,7 @@ define([
                 self.focus();
 
                 // rename trigger
-                editor.execCommand('tern-rename');
+                editor.execCommand('yatern-rename');
             });
         },
 
@@ -1524,23 +1527,25 @@ define([
                 // Rename
                 items['&Source'] = sourceItems;
 
-                if (editor._ternAddon) {
-                    editor._ternAddon.request(editor,
-                                              {type: 'rename', newName: 'merong', fullDocs: true},
-                                              function (error/*, data*/) {
-                        if (!error) {
-                            sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
-                        }
-                        deferred.resolve(items);
-                    });
-                } else {
-                    deferred.resolve(items);
-                }
+                sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
+                //if (editor.yaternAddon) {
+                //    console.info('!!!!');
+                //    editor.yaternAddon.request(editor,
+                //                              {type: 'rename', newName: 'merong', fullDocs: true},
+                //                              function (error/*, data*/) {
+                //        if (!error) {
+                //            sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
+                //        }
+                //        deferred.resolve(items);
+                //    });
+                //} else {
+                //    deferred.resolve(items);
+                //}
             } else {
                 deferred.resolve(items);
             }
         },
-        
+
         getContextMenuItems: function (opened, items, menuItems, deferred) {
 
             function selectionCommentable(editor) {
@@ -1562,7 +1567,7 @@ define([
                     mode1.blockCommentEnd === mode2.blockCommentEnd &&
                     (comments = getEnclosingBlockComments(mode1, editor, from, to)) && comments.length === 0;
             }
-                       
+
             var editor = this.editor;
             if (editor) {
                 var selected = editor.getSelection();
@@ -1652,8 +1657,8 @@ define([
                 items['&Go to Definition'] = menuItems.navMenuItems['&Go to Definition'];
 
                 if (this.isDefaultKeyMap()) {
-                    items['G&o to Line'] = menuItems.navMenuItems['G&o to Line'];               
-                }            
+                    items['G&o to Line'] = menuItems.navMenuItems['G&o to Line'];
+                }
 
                 if (this.isThereMatchingBracket()) {
                     items['Go to &Matching Brace'] = menuItems.navMenuItems['Go to &Matching Brace'];
@@ -1677,7 +1682,7 @@ define([
                     items['&Save'] = menuItems.fileMenuItems['&Save'];
                 }
                 deferred.resolve(items);
-            }            
+            }
         }
     });
 
