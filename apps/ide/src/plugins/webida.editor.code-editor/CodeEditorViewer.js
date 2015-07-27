@@ -34,7 +34,8 @@ define([
 	'webida-lib/util/loadCSSList',
 	'webida-lib/util/logger/logger-client',
 	'plugins/webida.editor.text-editor/TextEditorViewer',
-	'./snippet'
+	'./snippet',
+    'dojo/topic'
 ], function (
 	require,
 	genetic,
@@ -44,7 +45,8 @@ define([
 	loadCSSList,
 	Logger,
 	TextEditorViewer,
-	Snippet
+	Snippet,
+    topic
 ) {
     'use strict';
 // @formatter:on
@@ -953,11 +955,15 @@ define([
 	                action(self);
 	            });
 	            delete this.deferredActions;
-	        }
-
-	        this.sizeChangePoller = setInterval(function () {
-	            self.__checkSizeChange();
-	        }, 500);
+	        }	        
+            
+            this.resizeTopicHandler = topic.subscribe('editor-panel-resize-finished', function () {
+                self.__checkSizeChange();
+            });
+            
+            this.closeTopicHandler = topic.subscribe('editors.closed', function (path) {
+                self.refresh();
+            });
 
 	        this.editor.on('mousedown', function (cm, e) {
 	            if (settings.gotoLinkEnabled) {

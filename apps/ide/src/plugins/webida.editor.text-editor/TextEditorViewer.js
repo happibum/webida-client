@@ -36,7 +36,8 @@ define([
     'webida-lib/plugins/editors/plugin',
     'webida-lib/util/loadCSSList',
     'webida-lib/util/logger/logger-client',
-    'webida-lib/plugins/workbench/ui/EditorViewer'
+    'webida-lib/plugins/workbench/ui/EditorViewer',
+    'dojo/topic'
 ], function (
     require,
     genetic,
@@ -45,7 +46,8 @@ define([
     editors,
     loadCSSList,
     Logger,
-    EditorViewer
+    EditorViewer,
+    topic
 ) {
     'use strict';
 // @formatter:on
@@ -298,11 +300,15 @@ define([
                     action(self);
                 });
                 delete this.deferredActions;
-            }
-
-            this.sizeChangePoller = setInterval(function() {
+            }            
+            
+            this.resizeTopicHandler = topic.subscribe('editor-panel-resize-finished', function () {
                 self.__checkSizeChange();
-            }, 500);
+            });
+            
+            this.closeTopicHandler = topic.subscribe('editors.closed', function (path) {
+                self.refresh();
+            });
 
             // conditionally indent on paste
             self.editor.on('change', function(cm, e) {
@@ -315,7 +321,6 @@ define([
         },
 
         __checkSizeChange: function() {
-            //TODO : Remove this polling routine and refactor sizechange checker.
             if (this.editor) {
                 var visible = $(this.elem).is(':visible');
                 if (visible) {
@@ -337,10 +342,15 @@ define([
         },
 
         destroy: function() {
+            //unsubscribing topics
+            
+            this.resizeTopicHandler.remove();
+            this.resizeTopicHandler = null;
+            
+            this.closeTopicHandler.remove();
+            this.closeTopicHandler = null;
+            
             $(this.elem).html('');
-            if (this.sizeChangePoller !== undefined) {
-                clearInterval(this.sizeChangePoller);
-            }
         },
 
         addChangeListener: function(listener) {
@@ -823,9 +833,10 @@ define([
                 this.setValue(this.getModel().getText());
             }
             if (this.editor) {
-                setTimeout(function(editor) {
-                    editor.refresh();
-                }, 0, this.editor)
+                setTimeout(function (self) {
+                    self.editor.refresh();
+                    self.__checkSizeChange();
+                }, 0, this);
             }
         },
 
