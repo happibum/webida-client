@@ -10,13 +10,6 @@ define(['require',
 
         var renameCount = 0;
         function renameVariableViaDialog(cm) {
-            var ranges = cm.listSelections();
-            if (ranges.length > 1) {
-                // do nothing for multiple selections
-                return;
-            }
-            var curPos = cm.getCursor();
-            var cursorIndex = cm.indexFromPos(curPos);
             var sentValue = cm.getValue();
 
             function dialog(cm, text, dfltText, f) {
@@ -31,16 +24,11 @@ define(['require',
                 }
             }
 
-            assist.send({mode: 'js', type: 'request', server: null,
-                    body: {pos: cursorIndex, code: sentValue}},
+            withVariableOccurrences(cm,
                 function (error, data) {
-                    if (cm.getValue() !== sentValue) {
-                        // if there is code change after the request,
+                    if (data === null || cm.getValue() !== sentValue) {
+                        // if not on a variable or there is code change after the request,
                         // then do nothing.
-                        return;
-                    }
-                    if (data === null) {
-                        // not on a variable
                         return;
                     }
                     var oldName = data[0].name;
@@ -56,28 +44,19 @@ define(['require',
                         }
                     });
 
-                }
-            );
-
+                });
         }
 
         function selectVariables(cm) {
-            var ranges = cm.listSelections();
-            if (ranges.length > 1) {
-                // do nothing for multiple selections
-                return;
-            }
-            var curPos = cm.getCursor();
-            var cursorIndex = cm.indexFromPos(curPos);
             var sentValue = cm.getValue();
-            assist.send({mode: 'js', type: 'request', server: null,
-                    body: {pos: cursorIndex, code: sentValue}},
+            withVariableOccurrences(cm,
                 function (error, data) {
-                    if (cm.getValue() !== sentValue) {
-                        // if there is code change after the request,
+                    if (data === null || cm.getValue() !== sentValue) {
+                        // if not on a variable or there is code change after the request,
                         // then do nothing.
                         return;
                     }
+                    var curPos = cm.getCursor();
                     var ranges = [], cur = 0;
                     for (var i = 0; i < data.length; i++) {
                         var node = data[i];
@@ -95,7 +74,7 @@ define(['require',
             );
         }
 
-        function findVariables(cm) {
+        function highlightVariableOccurrences(cm) {
             // assign clear and timeout variable for each cm instance
             var clear;
             var timeout;
@@ -108,14 +87,7 @@ define(['require',
 
             // real work is done by this
             function work() {
-                var ranges = cm.listSelections();
-                if (ranges.length > 1) {
-                    // do nothing for multiple selections
-                    return;
-                }
-                var cursorPos = cm.indexFromPos(cm.getCursor());
-                assist.send({mode: 'js', type: 'request', server: null,
-                        body: {pos: cursorPos, code: cm.getValue()}},
+                withVariableOccurrences(cm,
                     function (error, data) {
                         // clear the previous highlights
                         if (clear) {
@@ -148,19 +120,27 @@ define(['require',
             return registerTimeout;
         }
 
+        function withVariableOccurrences(cm, c) {
+            var ranges = cm.listSelections();
+            if (ranges.length > 1) {
+                c(null, null);
+                return;
+            }
+            var cursorIndexPos = cm.indexFromPos(cm.getCursor());
+            assist.send({mode: 'js', type: 'request', server: null,
+                    body: {pos: cursorIndexPos, code: cm.getValue()}}, c);
+        }
+
         return {startServer: function (filepath, cm, option, c) {
-            console.info('!!! yatern.js startServer');
-
-            cm.yaternAddon = {};
-
-            cm.yaternAddon.rename = function (cm) {
-                renameVariableViaDialog(cm);
+            cm.yaternAddon = {
+                rename: renameVariableViaDialog,
+                withVariableOccurrences: withVariableOccurrences
             };
+
             cm.setOption('extraKeys', {
-                'Ctrl-J': function (cm) { selectVariables(cm); },
-                'Ctrl-Q': function (cm) { renameVariableViaDialog(cm); }
+                'Ctrl-J': function (cm) { selectVariables(cm); }
             });
 
-            cm.on('cursorActivity', findVariables(cm));
+            cm.on('cursorActivity', highlightVariableOccurrences(cm));
         }};
     });

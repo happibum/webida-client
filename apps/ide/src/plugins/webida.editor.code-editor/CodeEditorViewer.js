@@ -955,12 +955,12 @@ define([
 	                action(self);
 	            });
 	            delete this.deferredActions;
-	        }	        
-            
+	        }
+
             this.resizeTopicHandler = topic.subscribe('editor-container-layout-changed', function () {
                 self.checkSizeChange();
             });
-                        
+
 	        this.editor.on('mousedown', function (cm, e) {
 	            if (settings.gotoLinkEnabled) {
 	                require(['./content-assist/goto-link'], function (gotolink) {
@@ -1529,20 +1529,17 @@ define([
                 // Rename
                 items['&Source'] = sourceItems;
 
-                sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
-                //if (editor.yaternAddon) {
-                //    console.info('!!!!');
-                //    editor.yaternAddon.request(editor,
-                //                              {type: 'rename', newName: 'merong', fullDocs: true},
-                //                              function (error/*, data*/) {
-                //        if (!error) {
-                //            sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
-                //        }
-                //        deferred.resolve(items);
-                //    });
-                //} else {
-                //    deferred.resolve(items);
-                //}
+                if (editor.yaternAddon) {
+                    editor.yaternAddon.withVariableOccurrences(editor,
+                        function (error, data) {
+                            if (data) {
+                                sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
+                            }
+                            deferred.resolve(items);
+                        });
+                } else {
+                    deferred.resolve(items);
+                }
             } else {
                 deferred.resolve(items);
             }
@@ -1666,15 +1663,14 @@ define([
                     items['Go to &Matching Brace'] = menuItems.navMenuItems['Go to &Matching Brace'];
                 }
 
-                if (editor._ternAddon) {
-                    editor._ternAddon.request(editor,
-                                              {type: 'rename', newName: 'merong', fullDocs: true},
-                                              function (error/*, data*/) {
-                        if (!error) {
-                            sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
-                        }
-                        deferred.resolve(items);
-                    });
+                if (editor.yaternAddon) {
+                    editor.yaternAddon.withVariableOccurrences(editor,
+                        function (error, data) {
+                            if (data) {
+                                sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
+                            }
+                            deferred.resolve(items);
+                        });
                 } else {
                     deferred.resolve(items);
                 }
