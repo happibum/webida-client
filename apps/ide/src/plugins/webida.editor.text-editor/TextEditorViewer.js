@@ -302,13 +302,9 @@ define([
                 delete this.deferredActions;
             }            
             
-            this.resizeTopicHandler = topic.subscribe('editor-panel-resize-finished', function () {
-                self.__checkSizeChange();
-            });
-            
-            this.closeTopicHandler = topic.subscribe('editors.closed', function (path) {
-                self.refresh();
-            });
+            this.resizeTopicHandler = topic.subscribe('editor-container-layout-changed', function () {
+                self.checkSizeChange();
+            }); 
 
             // conditionally indent on paste
             self.editor.on('change', function(cm, e) {
@@ -320,7 +316,7 @@ define([
             });
         },
 
-        __checkSizeChange: function() {
+        checkSizeChange: function() {
             if (this.editor) {
                 var visible = $(this.elem).is(':visible');
                 if (visible) {
@@ -345,11 +341,8 @@ define([
             //unsubscribing topics
             
             this.resizeTopicHandler.remove();
-            this.resizeTopicHandler = null;
-            
-            this.closeTopicHandler.remove();
-            this.closeTopicHandler = null;
-            
+            this.resizeTopicHandler = null;       
+          
             $(this.elem).html('');
         },
 
@@ -834,8 +827,7 @@ define([
             }
             if (this.editor) {
                 setTimeout(function (self) {
-                    self.editor.refresh();
-                    self.__checkSizeChange();
+                    self.editor.refresh();                    
                 }, 0, this);
             }
         },
