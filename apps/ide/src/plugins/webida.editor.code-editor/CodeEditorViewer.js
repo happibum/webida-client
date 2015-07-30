@@ -1530,7 +1530,7 @@ define([
                 items['&Source'] = sourceItems;
 
                 if (editor.yaternAddon) {
-                    editor.yaternAddon.withVariableOccurrences(editor,
+                    editor.yaternAddon.withOccurrences('variableOccurrences', editor,
                         function (error, data) {
                             if (data) {
                                 sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
@@ -1664,7 +1664,7 @@ define([
                 }
 
                 if (editor.yaternAddon) {
-                    editor.yaternAddon.withVariableOccurrences(editor,
+                    editor.yaternAddon.withOccurrences('variableOccurrences', editor,
                         function (error, data) {
                             if (data) {
                                 sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];

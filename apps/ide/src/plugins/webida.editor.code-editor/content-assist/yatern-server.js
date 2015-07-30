@@ -47,10 +47,17 @@ define([
         server.request = function (server, body, callback) {
             console.info('REQUEST');
 
-            // currently handle only one kind of request
             var result = YAtern.analyze(body.code, true);
-            var refs = YAtern.findVarRefsAt(result.AST, body.pos);
-            callback(undefined, refs);
+            switch (body.type) {
+                case 'variableOccurrences':
+                    var refs = YAtern.findVarRefsAt(result.AST, body.pos);
+                    callback(undefined, refs);
+                    break;
+                case 'returnOccurrences':
+                    var rets = YAtern.findReturnStatements(result.AST, body.pos, true);
+                    callback(undefined, rets);
+                    break;
+            }
         };
         return server;
     });

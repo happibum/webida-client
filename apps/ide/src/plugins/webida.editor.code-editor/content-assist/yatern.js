@@ -24,7 +24,7 @@ define(['require',
                 }
             }
 
-            withVariableOccurrences(cm,
+            withOccurrences('variableOccurrences',cm,
                 function (error, data) {
                     if (data === null || cm.getValue() !== sentValue) {
                         // if not on a variable or there is code change after the request,
@@ -49,7 +49,7 @@ define(['require',
 
         function selectVariables(cm) {
             var sentValue = cm.getValue();
-            withVariableOccurrences(cm,
+            withOccurrences('variableOccurrences', cm,
                 function (error, data) {
                     if (data === null || cm.getValue() !== sentValue) {
                         // if not on a variable or there is code change after the request,
@@ -74,7 +74,7 @@ define(['require',
             );
         }
 
-        function highlightVariableOccurrences(cm) {
+        function highlightOccurrences(occurType, cm) {
             // assign clear and timeout variable for each cm instance
             var clear;
             var timeout;
@@ -85,62 +85,71 @@ define(['require',
                 timeout = setTimeout(function () { work(cm); }, 250);
             }
 
+            function highlighter(error, occurList) {
+                // clear the previous highlights
+                if (clear) {
+                    clear();
+                    clear = null;
+                }
+                // check whether we found occurrences
+                if (occurList === null) {
+                    return;
+                }
+                var hls = [];
+                for (var i = 0; i < occurList.length; i++) {
+                    var node = occurList[i];
+                    var startPos = cm.posFromIndex(node.start);
+                    var endPos = cm.posFromIndex(node.end);
+
+                    hls.push(cm.markText(startPos, endPos,
+                        {className: 'cm-searching'}));
+                }
+
+                clear = function () {
+                    cm.operation(function () {
+                        for (var i = 0; i < hls.length; i++) {
+                            hls[i].clear();
+                        }
+                    });
+                };
+            }
+
             // real work is done by this
             function work() {
-                withVariableOccurrences(cm,
-                    function (error, data) {
-                        // clear the previous highlights
-                        if (clear) {
-                            clear();
-                            clear = null;
-                        }
-                        // check whether we found occurrences
-                        if (data === null) {
-                            return;
-                        }
-                        var hls = [];
-                        for (var i = 0; i < data.length; i++) {
-                            var node = data[i];
-                            var startPos = cm.posFromIndex(node.start);
-                            var endPos = cm.posFromIndex(node.end);
-
-                            hls.push(cm.markText(startPos, endPos,
-                                {className: 'cm-searching'}));
-                        }
-
-                        clear = function () {
-                            cm.operation(function () {
-                                for (var i = 0; i < hls.length; i++) {
-                                    hls[i].clear();
-                                }
-                            });
-                        };
-                    });
+                withOccurrences(occurType, cm, highlighter);
             }
+
             return registerTimeout;
         }
 
-        function withVariableOccurrences(cm, c) {
+        function withOccurrences(reqType, cm, c) {
             var ranges = cm.listSelections();
             if (ranges.length > 1) {
                 c(null, null);
                 return;
             }
             var cursorIndexPos = cm.indexFromPos(cm.getCursor());
-            assist.send({mode: 'js', type: 'request', server: null,
-                    body: {pos: cursorIndexPos, code: cm.getValue()}}, c);
+            assist.send(
+                {mode: 'js', type: 'request', server: null,
+                    body: {
+                        type: reqType,
+                        pos: cursorIndexPos,
+                        code: cm.getValue()
+                    }
+                }, c);
         }
 
         return {startServer: function (filepath, cm, option, c) {
             cm.yaternAddon = {
                 rename: renameVariableViaDialog,
-                withVariableOccurrences: withVariableOccurrences
+                withOccurrences: withOccurrences
             };
 
             cm.setOption('extraKeys', {
                 'Ctrl-J': function (cm) { selectVariables(cm); }
             });
 
-            cm.on('cursorActivity', highlightVariableOccurrences(cm));
+            cm.on('cursorActivity', highlightOccurrences('variableOccurrences', cm));
+            cm.on('cursorActivity', highlightOccurrences('returnOccurrences', cm));
         }};
     });
