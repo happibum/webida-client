@@ -54,7 +54,7 @@ define([
                     callback(undefined, refs);
                     break;
                 case 'returnOccurrences':
-                    var rets = YAtern.findReturnStatements(result.AST, body.pos, true);
+                    var rets = YAtern.findReturnStatements(result.AST, body.pos);
                     callback(undefined, rets);
                     break;
             }
