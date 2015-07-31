@@ -151,5 +151,6 @@ define(['require',
 
             cm.on('cursorActivity', highlightOccurrences('variableOccurrences', cm));
             cm.on('cursorActivity', highlightOccurrences('returnOccurrences', cm));
+            cm.on('cursorActivity', highlightOccurrences('thisOccurrences', cm));
         }};
     });

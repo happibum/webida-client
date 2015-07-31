@@ -57,6 +57,9 @@ define([
                     var rets = YAtern.findReturnStatements(result.AST, body.pos);
                     callback(undefined, rets);
                     break;
+                case 'thisOccurrences':
+                    var thisExprs = YAtern.findThisExpressions(result.AST, body.pos, true);
+                    callback(undefined, thisExprs);
             }
         };
         return server;
