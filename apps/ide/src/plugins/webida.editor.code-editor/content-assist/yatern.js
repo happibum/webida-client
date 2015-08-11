@@ -8,6 +8,69 @@ define(['require',
             console.info('!!! not implemented yet');
         });
 
+        // ***** start of code taken from tern addon
+        var cls = "CodeMirror-Tern-";
+
+        function tempTooltip(cm, content) {
+            var where = cm.cursorCoords();
+            var tip = makeTooltip(where.right + 1, where.bottom, content);
+            function clear() {
+                if (!tip.parentNode) return;
+                cm.off("cursorActivity", clear);
+                fadeOut(tip);
+            }
+            setTimeout(clear, 1700);
+            cm.on("cursorActivity", clear);
+        }
+
+        function makeTooltip(x, y, content) {
+            var node = elt("div", cls + "tooltip", content);
+            node.style.left = x + "px";
+            node.style.top = y + "px";
+            document.body.appendChild(node);
+            return node;
+        }
+
+        function elt(tagname, cls /*, ... elts*/) {
+            var e = document.createElement(tagname);
+            if (cls) e.className = cls;
+            for (var i = 2; i < arguments.length; ++i) {
+                var elt = arguments[i];
+                if (typeof elt == "string") elt = document.createTextNode(elt);
+                e.appendChild(elt);
+            }
+            return e;
+        }
+
+        function remove(node) {
+            var p = node && node.parentNode;
+            if (p) p.removeChild(node);
+        }
+
+        function fadeOut(tooltip) {
+            tooltip.style.opacity = "0";
+            setTimeout(function() { remove(tooltip); }, 1100);
+        }
+        // ***** end of code taken from tern addon
+
+        function showType(cm) {
+            function doTooltip(error, data) {
+                tempTooltip(cm, data.typeString);
+            }
+            var start = cm.indexFromPos(cm.getCursor('start'));
+            var end = cm.indexFromPos(cm.getCursor('end'));
+
+            assist.send(
+                {mode: 'js', type: 'request', server: null,
+                    body: {
+                        type: 'showType',
+                        start: start,
+                        end: end,
+                        code: cm.getValue()
+                    }
+                }, doTooltip);
+        }
+
         var renameCount = 0;
         function renameVariableViaDialog(cm) {
             var sentValue = cm.getValue();
@@ -142,11 +205,13 @@ define(['require',
         return {startServer: function (filepath, cm, option, c) {
             cm.yaternAddon = {
                 rename: renameVariableViaDialog,
-                withOccurrences: withOccurrences
+                withOccurrences: withOccurrences,
+                showType: showType
             };
 
             cm.setOption('extraKeys', {
-                'Ctrl-J': function (cm) { selectVariables(cm); }
+                'Ctrl-J': function (cm) { selectVariables(cm); },
+                'Ctrl-I': function (cm) { showType(cm); }
             });
 
             cm.on('cursorActivity', highlightOccurrences('variableOccurrences', cm));

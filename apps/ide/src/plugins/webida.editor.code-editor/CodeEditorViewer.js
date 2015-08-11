@@ -331,8 +331,8 @@ define([
         foldCode(cm, cm.getCursor('start'), cm.getCursor('end'));
     };
 
-    codemirror.commands['tern-showtype'] = function (cm) {
-        cm._ternAddon.showType(cm);
+    codemirror.commands['yatern-showtype'] = function (cm) {
+        cm.yaternAddon.showType(cm);
     };
     codemirror.commands['tern-gotodefinition'] = function (cm) {
         cm._ternAddon.jumpToDef(cm);

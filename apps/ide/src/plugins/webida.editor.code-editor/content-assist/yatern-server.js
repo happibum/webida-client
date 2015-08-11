@@ -60,6 +60,13 @@ define([
                 case 'thisOccurrences':
                     var thisExprs = YAtern.findThisExpressions(result.AST, body.pos, true);
                     callback(undefined, thisExprs);
+                    break;
+                case 'showType':
+                    var typeData = YAtern.getTypeData(result.AST, result.Ĉ, body.start, body.end);
+                    callback(undefined, typeData);
+                    break;
+                default:
+                    throw new Error('Unknown request type');
             }
         };
         return server;
