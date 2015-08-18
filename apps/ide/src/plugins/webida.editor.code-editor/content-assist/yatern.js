@@ -4,9 +4,27 @@ define(['require',
     function (require, CodeMirror, assist) {
         'use strict';
 
-        CodeMirror.registerHelper('hint', 'javascript', function (cm, c, options) {
-            console.info('!!! not implemented yet');
-        });
+        function hint(cm, callback, options) {
+
+            assist.send(
+                {mode: 'js', type: 'request', server: null,
+                    body: {
+                        type: 'completions',
+                        pos: cm.indexFromPos(cm.getCursor()),
+                        code: cm.getValue()
+                    }
+                }, callbackWrapper);
+
+            function callbackWrapper(error, data) {
+                if (data) {
+                    var from = cm.posFromIndex(data.from);
+                    var to = cm.posFromIndex(data.to);
+                    callback({list: data.list, from: from, to: to});
+                }
+            }
+        }
+
+        CodeMirror.registerHelper('hint', 'javascript', hint);
 
         // ***** start of code taken from tern addon
         var cls = "CodeMirror-Tern-";
@@ -210,6 +228,7 @@ define(['require',
             };
 
             cm.setOption('extraKeys', {
+                'Ctrl-Space': function (cm) { CodeMirror.commands.autocomplete(cm, {}); },
                 'Ctrl-J': function (cm) { selectVariables(cm); },
                 'Ctrl-I': function (cm) { showType(cm); }
             });

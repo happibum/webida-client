@@ -65,6 +65,10 @@ define([
                     var typeData = YAtern.getTypeData(result.AST, result.Ĉ, body.start, body.end);
                     callback(undefined, typeData);
                     break;
+                case 'completions':
+                    var completions = YAtern.getCompletionAtPos(result, body.pos);
+                    callback(undefined, completions);
+                    break;
                 default:
                     throw new Error('Unknown request type');
             }

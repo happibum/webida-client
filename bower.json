@@ -22,6 +22,6 @@
     "showdown": "~1.1.0",
     "socket.io-client": "git://github.com/automattic/socket.io-client#~1.3.5",
     "eventEmitter": "~4.2.11",
-    "yatern": "git://github.com/happibum/yatern#9833caabd0eace2209bf473d3a1ab2c1661b93b5"
+    "yatern": "git://github.com/happibum/yatern#67590d7f1a8d096162f32a9e601bf1e3629a9680"
   }
 }
