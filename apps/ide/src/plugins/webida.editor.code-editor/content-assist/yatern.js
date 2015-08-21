@@ -19,12 +19,24 @@ define(['require',
                 if (data) {
                     var from = cm.posFromIndex(data.from);
                     var to = cm.posFromIndex(data.to);
-                    callback({list: data.list, from: from, to: to});
+                    var list = [];
+                    data.list.forEach(function (entry) {
+                        if (typeof entry === 'string') {
+                            list.push(entry);
+                        } else {
+                            list.push({text: entry.text, className: getIconClass(entry.icon)});
+                        }
+                    });
+                    callback({list: list, from: from, to: to});
                 }
             }
         }
 
         CodeMirror.registerHelper('hint', 'javascript', hint);
+
+        function getIconClass(icon) {
+            return cls + "completion " + cls + "completion-" + icon;
+        }
 
         // ***** start of code taken from tern addon
         var cls = "CodeMirror-Tern-";
