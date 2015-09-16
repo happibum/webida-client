@@ -36,6 +36,14 @@ define([], function () {
                     title: 'Common'
                 },
                 {
+                    key: 'webida.editor.code-editor:contentAssistEngine',
+                    type: 'select',
+                    opt: {
+                        name: 'Select content-assist engine',
+                        items: ['tern', 'yatern']
+                    }
+                },
+                {
                     key: 'webida.editor.text-editor:enableSnippet',
                     type: 'checkbox',
                     opt: {
