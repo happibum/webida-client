@@ -71,7 +71,7 @@ define(['./plugin',
             'tern-showtype': 'JavaScript show type of variable',
             'tern-gotodefinition': 'JavaScript go to definition',
             'tern-jumpback': 'JavaScript jump back to the reference',
-            'yatern-rename': 'JavaScript rename variable',
+            'calcium-rename': 'JavaScript rename variable',
 
             // emmet shortcuts. see webida.editor.text-editor/emmet.js
             'emmet.expand_abbreviation': 'Expand abbreviation',

@@ -233,7 +233,7 @@ define(['require',
         }
 
         return {startServer: function (filepath, cm, option, c) {
-            cm.yaternAddon = {
+            cm.calciumAddon = {
                 rename: renameVariableViaDialog,
                 withOccurrences: withOccurrences,
                 showType: showType

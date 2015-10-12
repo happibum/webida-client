@@ -333,8 +333,8 @@ define([
     codemirror.commands['tern-jumpback'] = function (cm) {
         cm._ternAddon.jumpBack(cm);
     };
-    codemirror.commands['yatern-rename'] = function (cm) {
-        cm.yaternAddon.rename(cm);
+    codemirror.commands['calcium-rename'] = function (cm) {
+        cm.calciumAddon.rename(cm);
     };
     /*
     codemirror.commands['tern-showreference'] = function (cm) {
@@ -931,8 +931,8 @@ define([
                     action(self);
                 });
                 delete this.deferredActions;
-            }            
-            
+            }
+
             topic.subscribe('editor-panel-resize-finished', function () {
                 self.__checkSizeChange();
             });

@@ -331,8 +331,8 @@ define([
         foldCode(cm, cm.getCursor('start'), cm.getCursor('end'));
     };
 
-    codemirror.commands['yatern-showtype'] = function (cm) {
-        cm.yaternAddon.showType(cm);
+    codemirror.commands['calcium-showtype'] = function (cm) {
+        cm.calciumAddon.showType(cm);
     };
     codemirror.commands['tern-gotodefinition'] = function (cm) {
         cm._ternAddon.jumpToDef(cm);
@@ -340,8 +340,8 @@ define([
     codemirror.commands['tern-jumpback'] = function (cm) {
         cm._ternAddon.jumpBack(cm);
     };
-    codemirror.commands['yatern-rename'] = function (cm) {
-        cm.yaternAddon.rename(cm);
+    codemirror.commands['calcium-rename'] = function (cm) {
+        cm.calciumAddon.rename(cm);
     };
     /*
     codemirror.commands['tern-showreference'] = function (cm) {
@@ -615,8 +615,8 @@ define([
         //        }
         //    });
         //});
-        require(['./content-assist/yatern'], function (yatern) {
-            yatern.startServer(editor.file.path, cm, {});
+        require(['./content-assist/calcium'], function (calcium) {
+            calcium.startServer(editor.file.path, cm, {});
         });
     }
 
@@ -1462,7 +1462,7 @@ define([
                 self.focus();
 
                 // rename trigger
-                editor.execCommand('yatern-rename');
+                editor.execCommand('calcium-rename');
             });
         },
 
@@ -1529,8 +1529,8 @@ define([
                 // Rename
                 items['&Source'] = sourceItems;
 
-                if (editor.yaternAddon) {
-                    editor.yaternAddon.withOccurrences('variableOccurrences', editor,
+                if (editor.calciumAddon) {
+                    editor.calciumAddon.withOccurrences('variableOccurrences', editor,
                         function (error, data) {
                             if (data) {
                                 sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];
@@ -1663,8 +1663,8 @@ define([
                     items['Go to &Matching Brace'] = menuItems.navMenuItems['Go to &Matching Brace'];
                 }
 
-                if (editor.yaternAddon) {
-                    editor.yaternAddon.withOccurrences('variableOccurrences', editor,
+                if (editor.calciumAddon) {
+                    editor.calciumAddon.withOccurrences('variableOccurrences', editor,
                         function (error, data) {
                             if (data) {
                                 sourceItems['&Rename Variables'] = menuItems.editMenuItems['&Source']['&Rename Variables'];

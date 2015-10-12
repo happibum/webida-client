@@ -15,7 +15,7 @@
  */
 
 define([
-        'external/yatern/dist/yatern',
+        'external/calcium/dist/calcium',
         './file-server'
     ],
     function (YAtern, fileServer) {

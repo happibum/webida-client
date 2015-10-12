@@ -71,7 +71,7 @@ function initServers(/*webidaHost, webidaLibPath, otherLibPath*/) {
     });
 
     require(['content-assist/file-server',
-             'content-assist/yatern-server',
+             'content-assist/calcium-server',
              'content-assist/css-hint-server',
              'content-assist/html-hint-server'],
     function (fileServer, jsserver, cssserver, htmlserver) {
