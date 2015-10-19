@@ -65,6 +65,10 @@ define([
                     var typeData = YAtern.getTypeData(result.AST, result.Ĉ, body.start, body.end);
                     callback(undefined, typeData);
                     break;
+                case 'structuredFnTypes':
+                    var fns = YAtern.getFnTypeStructuresAt(result.AST, result.Ĉ, body.pos);
+                    callback(undefined, fns);
+                    break;
                 case 'completions':
                     var completions = YAtern.getCompletionAtPos(result, body.pos);
                     callback(undefined, completions);

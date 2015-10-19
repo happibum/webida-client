@@ -232,11 +232,96 @@ define(['require',
                 }, c);
         }
 
+        // Maintaining argument hints
+
+        function updateArgHints(calciumAddon, cm) {
+            closeArgHints(calciumAddon);
+
+            if (cm.somethingSelected()) return;
+            var state = cm.getTokenAt(cm.getCursor()).state;
+            var inner = CodeMirror.innerMode(cm.getMode(), state);
+            if (inner.mode.name != 'javascript') return;
+            var lex = inner.state.lexical;
+            if (lex.info != 'call') return;
+
+            var ch, argPos = lex.pos || 0, tabSize = cm.getOption('tabSize');
+            for (var line = cm.getCursor().line, e = Math.max(0, line - 9), found = false; line >= e; --line) {
+                var str = cm.getLine(line), extra = 0;
+                for (var pos = 0;;) {
+                    var tab = str.indexOf('\t', pos);
+                    if (tab == -1) break;
+                    extra += tabSize - (tab + extra) % tabSize - 1;
+                    pos = tab + 1;
+                }
+                ch = lex.column - extra;
+                if (str.charAt(ch) == '(') {found = true; break;}
+            }
+            if (!found) return;
+
+            var start = cm.indexFromPos(CodeMirror.Pos(line, ch));
+
+            assist.send(
+                {mode: 'js', type: 'request', server: null,
+                    body: {
+                        type: 'structuredFnTypes',
+                        pos: start,
+                        code: cm.getValue()
+                    }
+                },
+                function (error, data) {
+                    console.log(data);
+                    showArgHints(data, cm, argPos);
+                }
+            );
+        }
+
+        function showArgHints(fnTypes, cm, argPos) {
+            var tip = elt('span', null);
+            for (var i = 0; i < fnTypes.length; i++) {
+                var typeInfo = fnTypes[i];
+
+                var aType = _createFnTypeDomElt(typeInfo, argPos);
+                tip.appendChild(aType);
+                tip.appendChild(elt('br', null));
+
+            }
+            var place = cm.cursorCoords(null, 'page');
+            console.log(place);
+            cm.calciumAddon.status.activeArgHints =
+                makeTooltip(place.right + 1, place.bottom, tip);
+        }
+
+        function _createFnTypeDomElt(fnType, pos) {
+            var tip = elt('span', null, '(');
+            for (var i = 0; i < fnType.params.length; ++i) {
+                if (i) tip.appendChild(document.createTextNode(', '));
+                var param = fnType.params[i];
+                tip.appendChild(elt('span', cls + 'farg' + (i == pos ? ' ' + cls + 'farg-current' : ''), param.name));
+                if (param.type !== undefined) {
+                    tip.appendChild(document.createTextNode(':\u00a0'));
+                    tip.appendChild(elt('span', cls + 'type', param.type));
+                }
+            }
+            tip.appendChild(document.createTextNode(fnType.ret ? ') ->\u00a0' : ')'));
+            if (fnType.ret) tip.appendChild(elt('span', cls + 'type', fnType.ret));
+            return tip;
+        }
+
+        function closeArgHints(calciumAddon) {
+            if (calciumAddon.status.activeArgHints) {
+                remove(calciumAddon.status.activeArgHints);
+                calciumAddon.activeArgHints = null;
+            }
+        }
+
         return {startServer: function (filepath, cm, option, c) {
             cm.calciumAddon = {
                 rename: renameVariableViaDialog,
                 withOccurrences: withOccurrences,
-                showType: showType
+                showType: showType,
+                status : {
+                    activeArgHints: null
+                }
             };
 
             cm.setOption('extraKeys', {
@@ -248,5 +333,6 @@ define(['require',
             cm.on('cursorActivity', highlightOccurrences('variableOccurrences', cm));
             cm.on('cursorActivity', highlightOccurrences('returnOccurrences', cm));
             cm.on('cursorActivity', highlightOccurrences('thisOccurrences', cm));
+            cm.on('cursorActivity', function () { updateArgHints(cm.calciumAddon, cm); });
         }};
     });
