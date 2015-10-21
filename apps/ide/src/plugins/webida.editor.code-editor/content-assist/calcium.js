@@ -314,10 +314,36 @@ define(['require',
             }
         }
 
+        function jumpToDef(cm) {
+            var start = cm.indexFromPos(cm.getCursor('start'));
+            var end = cm.indexFromPos(cm.getCursor('end'));
+
+            assist.send(
+                {mode: 'js', type: 'request', server: null,
+                    body: {
+                        type: 'definitionSites',
+                        start: start,
+                        end: end,
+                        code: cm.getValue()
+                    }
+                }, function (error, data) {
+                    moveToPosition(cm, data);
+                });
+        }
+
+        // Temporarily, jump within a single file
+        function moveToPosition(cm, data) {
+            // for now we use the first item from the data
+            if (data.length === 0) return;
+            var pos = cm.posFromIndex(data[0].at);
+            cm.setCursor(pos.line, pos.ch);
+        }
+
         return {startServer: function (filepath, cm, option, c) {
             cm.calciumAddon = {
                 rename: renameVariableViaDialog,
                 withOccurrences: withOccurrences,
+                jumpToDef: jumpToDef,
                 showType: showType,
                 status : {
                     activeArgHints: null

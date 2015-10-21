@@ -69,6 +69,10 @@ define([
                     var fns = YAtern.getFnTypeStructuresAt(result.AST, result.Ĉ, body.pos);
                     callback(undefined, fns);
                     break;
+                case 'definitionSites':
+                    var sites = YAtern.getDefinitionSitesAt(result.AST, result.Ĉ, body.start, body.end);
+                    callback(undefined, sites);
+                    break;
                 case 'completions':
                     var completions = YAtern.getCompletionAtPos(result, body.pos);
                     callback(undefined, completions);

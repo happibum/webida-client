@@ -1428,7 +1428,7 @@ define([
             this.addDeferredAction(function (self) {
                 var editor = self.editor;
                 self.focus();
-                editor.execCommand('tern-gotodefinition');
+                editor.execCommand('calcium-gotodefinition');
             });
         },
 

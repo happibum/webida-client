@@ -334,8 +334,8 @@ define([
     codemirror.commands['calcium-showtype'] = function (cm) {
         cm.calciumAddon.showType(cm);
     };
-    codemirror.commands['tern-gotodefinition'] = function (cm) {
-        cm._ternAddon.jumpToDef(cm);
+    codemirror.commands['calcium-gotodefinition'] = function (cm) {
+        cm.calciumAddon.jumpToDef(cm);
     };
     codemirror.commands['tern-jumpback'] = function (cm) {
         cm._ternAddon.jumpBack(cm);
@@ -1452,7 +1452,7 @@ define([
             this.addDeferredAction(function (self) {
                 var editor = self.editor;
                 self.focus();
-                editor.execCommand('tern-gotodefinition');
+                editor.execCommand('calcium-gotodefinition');
             });
         },
 
