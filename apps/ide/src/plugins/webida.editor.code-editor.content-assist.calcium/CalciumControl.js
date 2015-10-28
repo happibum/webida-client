@@ -63,6 +63,7 @@ define([
         'thisOccurrences',
         'showType',
         'jumpToDef',
+        'closeArgHints',
         'structuredFnTypes',
         'definitionSites',
         'getHint',
