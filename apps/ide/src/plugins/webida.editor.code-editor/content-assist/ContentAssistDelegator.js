@@ -139,6 +139,9 @@ define([
                 c();
             }
         });
+        cm.on('blur', function () {
+            cm._contentAssistDelegator.execCommand('closeArgHints', cm);
+        });
     }
 
     function jshint(cm, callback) {
