@@ -37,7 +37,7 @@ define([
     'webida-lib/plugins/workbench/ui/PartViewer',
 	'webida-lib/util/loadCSSList',
 	'webida-lib/util/logger/logger-client',
-	'plugins/webida.editor.text-editor/TextEditorViewer',    
+	'plugins/webida.editor.text-editor/TextEditorViewer',
 	'./snippet',
     './content-assist/ContentAssistDelegator',
     'dojo/topic'
@@ -73,11 +73,11 @@ define([
     var _localHinterSchemes = {};
     var _globalHinterSchemes = [];
 
-    var hintersMap = {        
+    var hintersMap = {
         'coffee': {
             name: 'coffeescript',
             requires: ['external/codemirror/addon/hint/javascript-hint']
-        },        
+        },
         'xml': {
             name: 'xml',
             requires: ['external/codemirror/addon/hint/xml-hint']
@@ -205,18 +205,27 @@ define([
         }
     };
 
-    var cursorAtAutoHintTypes = [
+    var cursorAtAutoHintTokens = [
         {
             mode: ['javascript'],
-            tokenTypes: ['variable', 'variable-2', 'property']
+            tokenChecker: function (token) {
+                return token.type === 'variable' ||
+                    token.type === 'variable-2' ||
+                    token.type === 'property' ||
+                    (token.type === 'keyword' && token.string === 'this');
+            }
         },
         {
             mode: ['html', 'xml'],
-            tokenTypes: ['tag', 'attribute', 'link']
+            tokenChecker: function (token) {
+                return _.contains(['tag', 'attribute', 'link'], token.type);
+            }
         },
         {
             mode: ['css'],
-            tokenTypes: ['tag', 'builtin', 'qualifier', 'property error', 'property']
+            tokenChecker: function (token) {
+                return _.contains(['tag', 'builtin', 'qualifier', 'property error', 'property'], token.type);
+            }
         }
     ];
 
@@ -313,7 +322,7 @@ define([
     codemirror.commands.foldselection = function (cm) {
         foldCode(cm, cm.getCursor('start'), cm.getCursor('end'));
     };
-    
+
     codemirror.commands.gotoLine = function (cm) {
         if (cm.getOption('keyMap') === 'default') {
             var dialog = 'Go to line: <input type="text" style="width: 10em"/> <span style="color: #888"></span>';
@@ -361,8 +370,8 @@ define([
     function cursorAtAutoHint(cm, modeName, cursor, rightToken) {
         var token = cm.getTokenAt(cursor);
 
-        if (_.find(cursorAtAutoHintTypes, function (obj) {
-            return _.contains(obj.mode, modeName) && _.contains(obj.tokenTypes, token.type);
+        if (_.find(cursorAtAutoHintTokens, function (obj) {
+            return _.contains(obj.mode, modeName) && obj.tokenChecker(token);
         })) {
             return true;
         }
@@ -459,13 +468,13 @@ define([
             resultAll.hintContinue = resultAll.hintContinue || resultThis.hintContinue;
         }
     }
-    
+
     function setHinterSchemes() {
         var extInfos = ContentAssistDelegator.getCaExtensionInfos();
-        
+
         loadCSSList([require.toUrl('external/codemirror/addon/hint/show-hint.css')], function () {
             require(['external/codemirror/addon/hint/show-hint'], function () {
-                _.each(extInfos, function (extInfo) {                   
+                _.each(extInfos, function (extInfo) {
                     if (extInfo.hinterModes) {
                         _.each(extInfo.hinterModes, function (hinterMode) {
                             if (extInfo.hinterNames) {
@@ -476,7 +485,7 @@ define([
                                         _localHinterSchemes[hinterMode] = [{name: hinterName}];
                                     }
                                 });
-                            }                           
+                            }
                         });
                     } else {
                         if (extInfo.hinterNames) {
@@ -487,9 +496,9 @@ define([
                     }
                 });
             });
-        });        
+        });
     }
-    
+
     setHinterSchemes();
 
     function hint(cm, callback, options) {
@@ -551,14 +560,14 @@ define([
         });
 
         return localResult;
-    }    
-    
+    }
+
     function startContentAssist(editor, cm, c) {
         var options = {};
         options.useWorker = settings.useWorker;
-        options.autoHint = settings.autoHint;        
-        
-        return new ContentAssistDelegator(editor, cm, options, c);        
+        options.autoHint = settings.autoHint;
+
+        return new ContentAssistDelegator(editor, cm, options, c);
     }
 
     function setChangeForAutoHintDebounced() {
@@ -779,7 +788,7 @@ define([
             };
 			this.prepareCreate();
         },
-        
+
         /**
 		 * @override
 		 */
@@ -788,21 +797,21 @@ define([
             var self = this;
             // @formatter:off
             loadCSSList([
-                require.toUrl('plugins/webida.editor.text-editor/css/webida.css'), 
-                require.toUrl('external/codemirror/lib/codemirror.css'), 
+                require.toUrl('plugins/webida.editor.text-editor/css/webida.css'),
+                require.toUrl('external/codemirror/lib/codemirror.css'),
                 require.toUrl('external/codemirror/addon/dialog/dialog.css')
             ], function() {
                 logger.info('*require*');
                 require([
-                    'external/codemirror/addon/dialog/dialog', 
-                    'external/codemirror/addon/search/searchcursor', 
-                    'plugins/webida.editor.text-editor/search-addon', 
-                    'external/codemirror/addon/edit/closebrackets', 
-                    'external/codemirror/addon/edit/closetag', 
+                    'external/codemirror/addon/dialog/dialog',
+                    'external/codemirror/addon/search/searchcursor',
+                    'plugins/webida.editor.text-editor/search-addon',
+                    'external/codemirror/addon/edit/closebrackets',
+                    'external/codemirror/addon/edit/closetag',
                     'external/codemirror/addon/edit/matchbrackets'
                 ], function() {
                     logger.info('%cLoad CSS complete', 'color:orange');
-                    self.createEditorWidget(self.getParentNode());                    
+                    self.createEditorWidget(self.getParentNode());
                 });
             });
             // @formatter:on
@@ -872,8 +881,8 @@ define([
                         'external/codemirror/addon/tern/tern'
                     ], function () {
                         that.addDeferredAction(function () {
-                            if (mode === 'js' || 
-                                mode === 'html' || 
+                            if (mode === 'js' ||
+                                mode === 'html' ||
                                 mode === 'htmlmixed' ||
                                 mode === 'css') {
                                 _.defer(function () {
@@ -884,7 +893,7 @@ define([
                             } else {
                                 resolve('no ca started');
                             }
-                            that.editor.on('change', onChangeForAutoHint);                            
+                            that.editor.on('change', onChangeForAutoHint);
                         });
                     });
                 });
@@ -1093,7 +1102,7 @@ define([
 	            });
 	        }
 	    },
-        
+
 	    setGlobalHinters : function (hinterNames) {
 	        _globalHinterSchemes = [];
 	        if (hinterNames) {
@@ -1384,11 +1393,11 @@ define([
 
                 if (editor._contentAssistDelegator) {
                     editor._contentAssistDelegator.execCommand(
-                        'request', editor, 
+                        'request', editor,
                         {type: 'rename', newName: 'merong', fullDocs: true},
                         function (error/*, data*/) {
                             if (!error) {
-                                sourceItems['&Rename Variables'] = 
+                                sourceItems['&Rename Variables'] =
                                     menuItems.editMenuItems['&Source']['&Rename Variables'];
                             }
                             deferred.resolve(items);
@@ -1396,7 +1405,7 @@ define([
                     );
                 } else {
                     deferred.resolve(items);
-                }                
+                }
             } else {
             	deferred.resolve(items);
             }
@@ -1472,7 +1481,7 @@ define([
         var from = editor.getCursor('from');
         var to = editor.getCursor('to');
         var mode1 = editor.getModeAt(from);
-        var mode2 = editor.getModeAt(to);        
+        var mode2 = editor.getModeAt(to);
         return mode1.name === mode2.name &&
             mode1.lineComment && mode1.lineComment === mode2.lineComment;
     };
